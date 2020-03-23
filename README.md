@@ -1,5 +1,8 @@
 # smileFace
 ## Wifi-Hacking Tool
+
+Educational use only, only test on networks you own or have CONSENT to work on.
+
 Works best on debian based systems as the default names for devices are wlan0, eth0, etc.
 If you know how to change the device names to the above examples the script will run perfectly, at this time the script will not do it for you.
 

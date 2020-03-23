@@ -10,6 +10,8 @@ You will also need an ngrok code from myself to complete the install or you can 
 
 The zeroTier script is for my own lazy purposes.
 
+You will need a wifi-adapter capable of monitor mode and packet injection, I will be adding ways for the script to check this in the future 
+
 Usage:\
 cd smileFace\
 Chmod +x smileFace.sh\

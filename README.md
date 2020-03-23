@@ -6,9 +6,9 @@ You will also need an ngrok code from myself to complete the install or you can 
 
 The zeroTier script is for my own lazy purposes.
 
-Usage:
-cd smileFace
-Chmod +x smileFace.sh
-./smileFace.sh
+Usage:\
+cd smileFace\
+Chmod +x smileFace.sh\
+./smileFace.sh\
 
 :)

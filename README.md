@@ -9,6 +9,6 @@ The zeroTier script is for my own lazy purposes.
 Usage:\
 cd smileFace\
 Chmod +x smileFace.sh\
-./smileFace.sh\
+./smileFace.sh
 
 :)

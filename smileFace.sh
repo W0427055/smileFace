@@ -119,7 +119,7 @@ while [[ 1 == 1 ]] ; do
 
 	_EOF_
 
-	read -p "${green}Please select an options from the list ${resetColor}: " CHOICE 	
+	read -p "${green}Please select an option from the list ${resetColor}: " CHOICE 	
 if [[ "$CHOICE" =~ ^[1-7]$ ]]; then
 
 ##################################################################################################

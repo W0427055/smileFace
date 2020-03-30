@@ -253,12 +253,13 @@ while [[ $(id -u) == 0 ]] ; do
 			sleep 5
 			gnome-terminal -x dnsmasq -C /bin/dnsmasq.conf -d 	# -C for loading configuration and -d for daemon mode
 			echo "${green}Setting up the mysql database, the default password is 'fakeap' ${resetColor}"
-			chmod 777 SQL-Setup.sql
+			chmod 777 smileFace/SQL-Setup.sql
 			sleep $DELAY 
 			mysql < SQL-Setup.sql
 			sleep 2
 			read -p "${yellow}Would you like to put a set of test values into the database to ensure it worked [y/n] ${resetColor}?: " TESTSQL
 				if [ $TESTSQL == y] ; then
+					chmod 777 smileFace/SQL-FakeapTEST.sql
 					mysql -u fakeap -p < SQL-FakeapTEST.sql
 					sleep 2
 					echo "SQL setup complete"

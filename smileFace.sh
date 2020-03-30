@@ -129,7 +129,7 @@ while [[ $(id -u) == 0 ]] ; do
         4) Deploy EvilTwin with Captive Portal
         5) Deploy EvilTwin with BEEF Hook
         6) Crack a Password
-		7) Display SQL database 
+        7) Display SQL database 
         8) Exit Script
 
 	_EOF_

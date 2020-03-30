@@ -13,7 +13,7 @@ You will need a wifi-adapter capable of monitor mode and packet injection, I wil
 
 Usage:
 cd (Script works best in root/home directory)\
-git clone https://github.com/mavedirra-01/smileFace\
+git clone https://github.com/mavedirra-01/smileFace \
 cd smileFace\
 Chmod +x smileFace.sh\
 ./smileFace.sh

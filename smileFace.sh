@@ -353,7 +353,7 @@ while [[ $(id -u) == 0 ]] ; do
 ##################################################################################################
 
 		if [ $CHOICE == 7 ] ; then
-			mysql -u fakeap -p > SQL-Display.sql
+			mysql -u fakeap -p < SQL-Display.sql
 			sleep 5 
 		fi
 

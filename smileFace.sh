@@ -257,7 +257,7 @@ while [[ $(id -u) == 0 ]] ; do
 			sleep $DELAY 
 			mysql < ~/smileFace/SQL-Setup.sql
 			sleep 2
-			read -p "${yellow}Would you like to put a set of test values into the database to ensure it worked [y/n] ${resetColor}?: " TESTSQL
+			read -p "${yellow}Would you like to put a set of test values into the database to ensure it worked [y/n]? : ${resetColor}" TESTSQL
 				if [ $TESTSQL == y] ; then
 					chmod 777 ~/smileFace/SQL-FakeapTEST.sql
 					mysql -u fakeap -p < ~/smileFace/SQL-FakeapTEST.sql

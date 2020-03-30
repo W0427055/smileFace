@@ -255,12 +255,12 @@ while [[ $(id -u) == 0 ]] ; do
 			echo "${green}Setting up the mysql database, the default password is 'fakeap' ${resetColor}"
 			chmod 777 ~/smileFace/SQL-Setup.sql
 			sleep $DELAY 
-			mysql < SQL-Setup.sql
+			mysql < ~/smileFace/SQL-Setup.sql
 			sleep 2
 			read -p "${yellow}Would you like to put a set of test values into the database to ensure it worked [y/n] ${resetColor}?: " TESTSQL
 				if [ $TESTSQL == y] ; then
 					chmod 777 ~/smileFace/SQL-FakeapTEST.sql
-					mysql -u fakeap -p < SQL-FakeapTEST.sql
+					mysql -u fakeap -p < ~/smileFace/SQL-FakeapTEST.sql
 					sleep 2
 					echo "SQL setup complete"
 				fi

@@ -11,7 +11,7 @@ You will also need an ngrok code from me to complete the install or you can make
 
 You will need a wifi-adapter capable of monitor mode and packet injection, I will be adding ways for the script to check this in the future.
 
-Usage:
+Usage:\
 cd (Script works best in root/home directory)\
 git clone https://github.com/mavedirra-01/smileFace \
 cd smileFace\

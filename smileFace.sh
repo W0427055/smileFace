@@ -129,12 +129,13 @@ while [[ $(id -u) == 0 ]] ; do
         4) Deploy EvilTwin with Captive Portal
         5) Deploy EvilTwin with BEEF Hook
         6) Crack a Password
-        7) Exit Script
+		7) Display SQL database 
+        8) Exit Script
 
 	_EOF_
 
 	read -p "${green}Please select an option from the list ${resetColor}: " CHOICE 	
-	if [[ "$CHOICE" =~ ^[1-7]$ ]]; then 															# Validates range of number to ensure program runs 1-7 
+	if [[ "$CHOICE" =~ ^[1-8]$ ]]; then 															# Validates range of number to ensure program runs 1-7 
 
 ##################################################################################################
 
@@ -351,9 +352,16 @@ while [[ $(id -u) == 0 ]] ; do
 	
 ##################################################################################################
 
+		if [ $CHOICE == 7 ] ; then
+			mysql -u fakeap -p > SQL-Display.sql
+			sleep 5 
+		fi
+
+##################################################################################################
+
 # Section reverts the changes made to the network adapter that was put into monitor mode, restarts network manager, flushes iptables and prompts user to purge the handshakes directory as it clutters fast.
 
-		if [[ $CHOICE == 7 ]] ; then 
+		if [[ $CHOICE == 8 ]] ; then 
 			echo "Cleaning up ... "
 			airmon-ng stop $INTERFACE$MON $NULL
 			ifconfig $INTERFACE up $NULL

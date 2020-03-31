@@ -328,7 +328,7 @@ while [[ $(id -u) == 0 ]] ; do
 			beef-xss	
 			echo "${yellow}Setting up DNSmasq now, this will allow you to sniff traffic on clients connected to you.${resetColor}" 
 			sleep 5
-			gnome-terminal -x dnsmasq -C /etc/beef/dnsmasq.conf -d 	# -C for configuration and -d for daemon (background) mode  										
+			gnome-terminal -x dnsmasq -C /etc/beef/dnsmasq.conf -d 	# -C for configuration and -d for daemon mode  										
   			sleep $DELAY
   			echo "${yellow}Setting up DNSspoof, allowing for site redirects.${resetColor}"
   			gnome-terminal -x dnsspoof -i at0	

@@ -354,7 +354,7 @@ while [[ $(id -u) == 0 ]] ; do
 	
 ##################################################################################################
 
-		if [ $CHOICE == 7 ] ; then
+		if [[ $CHOICE == 7 ]] ; then
 			mysql -u fakeap -p < SQL-Display.sql					# Displays the contents of the SQL database setup in option 4, with the setup username. User enters password
 			sleep 5 
 		fi

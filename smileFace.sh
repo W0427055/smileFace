@@ -86,6 +86,8 @@ read -p "${red}Are you installing this with an ngrok code[n] or through lan[l]? 
 		unzip $ROGUE -d /var/www/html
 		rm -r $ROGUE
 		sleep 1
+		echo "A new window is about to open for you to edit a config file, just put your ip into the file."
+		gnome-terminal -x nano /var/www/html/index.html
 		read -p "${yellow}Hit enter once you've changed the beef config file under /var/www/html/index.html to your ip address : ${resetColor}"
 		clear
 	fi
@@ -102,6 +104,8 @@ read -p "${red}Are you installing this with an ngrok code[n] or through lan[l]? 
 		unzip $ROGUE -d /var/www/html
 		rm -r $ROGUE
 		sleep 1
+		echo "A new window is about to open for you to edit a config file, just put your ip into the file."
+		gnome-terminal -x nano /var/www/html/index.html
 		read -p "${yellow}Hit enter once you've changed the beef config file under /var/www/html/index.html to your ip address : ${resetColor}"
 		clear
 	fi
